@@ -1,0 +1,29 @@
+{
+  "framework": "hhvm",
+  "tests":
+    [{
+      "default": {
+        "setup_file"     : "setup_hhvm",
+        "json_url"       : "/json.php",
+        "db_url"         : "/db.php",
+        "query_url"      : "/queries.php?queries=",
+        "fortune_url"    : "/fortunes.php",
+        "update_url"     : "/updates.php?queries=",
+        "plaintext_url"  : "/plaintext.php",
+        "port"           : 8080,
+        "approach"       : "Realistic",
+        "classification" : "Platform",
+        "database"       : "MySQL",
+        "framework"      : "hhvm",
+        "language"       : "PHP",
+        "orm"            : "Raw",
+        "platform"       : "hhvm",
+        "webserver"      : "HPHP",
+        "os"             : "Linux",
+        "database_os"    : "Linux",
+        "display_name"   : "hhvm",
+        "notes"          : "",
+        "versus"         : "php"
+      }
+    }]
+}
