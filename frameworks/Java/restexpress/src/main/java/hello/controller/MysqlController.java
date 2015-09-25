@@ -1,7 +1,5 @@
 package hello.controller;
 
-import hello.domain.World;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,13 +9,16 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.sql.DataSource;
 
-import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.Response;
+import org.restexpress.Request;
+import org.restexpress.Response;
+
+import hello.domain.World;
 
 public class MysqlController
 {
 	// Database details.
 	private static final String DB_QUERY = "SELECT * FROM World WHERE id = ?";
+	private static final String DB_QUERY_MULTI = "SELECT * FROM World WHERE id in ?";
 	private static final int DB_ROWS = 10000;
 
 	private DataSource mysqlDataSource;
@@ -34,25 +35,7 @@ public class MysqlController
 		final DataSource source = mysqlDataSource;
 
 		// Get the count of queries to run.
-		int count = 1;
-		try
-		{
-			count = Integer.parseInt(request.getHeader("queries"));
-		
-			// Bounds check.
-			if (count > 500)
-			{
-				count = 500;
-			}
-			if (count < 1)
-			{
-				count = 1;
-			}
-		}
-		catch(NumberFormatException nfexc)
-		{
-			// do nothing
-		}
+		int count = getQueryCount(request);
 
 		// Fetch some rows from the database.
 		final World[] worlds = new World[count];
@@ -82,5 +65,29 @@ public class MysqlController
 		}
 
 		return worlds;
+	}
+
+	private int getQueryCount(Request request)
+	{
+		int count = 1;
+		try
+		{
+			count = Integer.parseInt(request.getHeader("queries"));
+		
+			// Bounds check.
+			if (count > 500)
+			{
+				count = 500;
+			}
+			if (count < 1)
+			{
+				count = 1;
+			}
+		}
+		catch(NumberFormatException nfexc)
+		{
+			// do nothing
+		}
+		return count;
 	}
 }

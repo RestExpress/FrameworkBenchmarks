@@ -1,16 +1,16 @@
 package hello.config;
 
+import java.util.Properties;
+
+import org.restexpress.Format;
+import org.restexpress.util.Environment;
+
+import com.strategicgains.repoexpress.mongodb.MongoConfig;
+
 import hello.controller.JsonController;
 import hello.controller.MongodbController;
 import hello.controller.MysqlController;
 import hello.controller.persistence.WorldsMongodbRepository;
-
-import java.util.Properties;
-
-import com.strategicgains.repoexpress.adapter.IdentiferAdapter;
-import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
-import com.strategicgains.restexpress.Format;
-import com.strategicgains.restexpress.util.Environment;
 
 public class Configuration
 extends Environment
@@ -48,14 +48,6 @@ extends Environment
 		jsonController = new JsonController();
 		mysqlController = new MysqlController(mysqlSettings.getDataSource());
         WorldsMongodbRepository worldMongodbRepository = new WorldsMongodbRepository(mongo.getClient(), mongo.getDbName());
-        worldMongodbRepository.setIdentifierAdapter(new IdentiferAdapter<Long>()
-		{
-			@Override
-			public Long convert(String id) throws InvalidObjectIdException
-			{
-				return Long.valueOf(id);
-			}
-		});
 		mongodbController = new MongodbController(worldMongodbRepository);
 	}
 

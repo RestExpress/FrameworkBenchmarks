@@ -1,21 +1,17 @@
 package hello;
 
+import org.restexpress.RestExpress;
+import org.restexpress.util.Environment;
+
 import hello.config.Configuration;
 import hello.controller.JsonController.HelloWorld;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import org.jboss.netty.handler.codec.http.HttpMethod;
-
-import com.strategicgains.restexpress.RestExpress;
-import com.strategicgains.restexpress.util.Environment;
+import io.netty.handler.codec.http.HttpMethod;
 
 public class Main
 {
 	public static void main(String[] args) throws Exception
 	{
-		Configuration config = loadEnvironment(args);
+		Configuration config = Environment.load(args, Configuration.class);
 		RestExpress server = new RestExpress()
 			.setName("RestExpress Benchmark")
 		    .setExecutorThreadCount(config.getExecutorThreadPoolSize())
@@ -32,17 +28,5 @@ public class Main
 
 		server.bind(config.getPort());
 		server.awaitShutdown();
-	}
-
-	private static Configuration loadEnvironment(String[] args)
-	throws FileNotFoundException,
-	    IOException
-	{
-		if (args.length > 0)
-		{
-			return Environment.from(args[0], Configuration.class);
-		}
-
-		return Environment.fromDefault(Configuration.class);
 	}
 }

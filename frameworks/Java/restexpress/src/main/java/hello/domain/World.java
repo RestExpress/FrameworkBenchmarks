@@ -1,11 +1,12 @@
 package hello.domain;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
 
-import com.github.jmkgreen.morphia.annotations.Entity;
-import com.github.jmkgreen.morphia.annotations.Id;
-import com.github.jmkgreen.morphia.annotations.Indexed;
 import com.strategicgains.repoexpress.domain.Identifiable;
+import com.strategicgains.repoexpress.domain.Identifier;
 
 @Entity(value="world", noClassnameStored=true)
 public class World
@@ -29,14 +30,14 @@ implements Identifiable
 		this.randomNumber = randomNumber;
 	}
 
-	public String getId()
+	public Identifier getId()
 	{
-		return (id == null ? null : id.toString());
+		return (id == null ? null : new Identifier(id));
 	}
 	
-	public void setId(String id)
+	public void setId(Identifier id)
 	{
-		this.id = (id == null ? null : Long.parseLong(id));
+		this.id = (id == null ? null : (Long) id.primaryKey());
 	}
 
 	public int getRandomNumber()

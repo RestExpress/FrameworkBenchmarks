@@ -5,9 +5,9 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
+import org.restexpress.common.exception.ConfigurationException;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
-import com.strategicgains.restexpress.exception.ConfigurationException;
 
 public class MysqlConfig
 {

@@ -1,13 +1,13 @@
 package hello.controller;
 
-import hello.controller.persistence.WorldsMongodbRepository;
-import hello.domain.World;
-
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.Response;
+import org.restexpress.Request;
+import org.restexpress.Response;
+
+import hello.controller.persistence.WorldsMongodbRepository;
 
 public class MongodbController
 {
@@ -25,6 +25,23 @@ public class MongodbController
 	public Object read(Request request, Response response)
 	{
 		// Get the count of queries to run.
+		int count = determineQueryCount(request);
+
+		// Fetch some rows from the database.
+		final Integer[] ids = generateIdentifiers(count);
+
+		if (count == 1)
+		{
+			return worldRepo.find(ids[0]);
+		}
+		else
+		{
+			return worldRepo.findAll(Arrays.asList(ids));
+		}
+	}
+
+	private int determineQueryCount(Request request)
+	{
 		int count = 1;
 		String value = request.getHeader("queries");
 
@@ -42,21 +59,19 @@ public class MongodbController
 		{
 			count = 1;
 		}
+		return count;
+	}
 
-		// Fetch some rows from the database.
-		final World[] worlds = new World[count];
+	private Integer[] generateIdentifiers(int count)
+	{
+		final Integer[] ids = new Integer[count];
 		final Random random = ThreadLocalRandom.current();
 
 		for (int i = 0; i < count; i++)
 		{
-			worlds[i] = worldRepo.find(random.nextInt(DB_ROWS) + 1);
+			ids[i] = random.nextInt(DB_ROWS) + 1;
 		}
 
-		if (count == 1)
-		{
-			return worlds[0];
-		}
-
-		return worlds;
+		return ids;
 	}
 }
