@@ -14,8 +14,12 @@ fw_get () {
 
   # -no-verbose disables the big progress bars but keeps
   # other basic info
-  wget --no-verbose --no-check-certificate \
-    --trust-server-names "$@"
+  #wget --no-verbose --no-check-certificate \
+  #  --trust-server-names "$@"
+  # DEPRECATED - older versions of wget use SSLv3 for handshaking
+  # and therefore don't work (Ubuntu12, for instance).
+  # Use curl instead (-s means silent; -L means follow 3xx responses)
+  curl -sL "$@"
 
   # Ensure the background job is killed if we are
   kill $!; trap 'kill $!' SIGTERM
@@ -91,9 +95,17 @@ fw_depends() {
     retcode=0
 
     # Ensure we are inside the installer root for this framework
-    cd $IROOT
+    pushd $IROOT
     wd=$(pwd)
     relative_wd=\$FWROOT${wd#$FWROOT}
+
+    # Check that the prerequisites have been loaded
+    RETCODE=$(fw_exists ${IROOT}/prerequisites.installed)
+    [ "$RETCODE" == 0 ] || { \
+      # Load environment variables
+      echo Installing prerequisites
+      source $FWROOT/toolset/setup/linux/prerequisites.sh
+      touch $IROOT/prerequisites.installed; }
 
     # Find and run the installer.sh file for this dependency
     # Turn on some bash options before sourcing: 
@@ -119,9 +131,14 @@ fw_depends() {
       . $FWROOT/toolset/setup/linux/frameworks/${depend}.sh
     else
       echo WARN: No installer found for $depend
+      # Return whence you came.
+      popd
       continue
     fi
     set +x
+
+    # Return whence you came.
+    popd
 
     # For a sourced script to pass, all internal commands must return
     # non-zero. If you want to intentionally cause a failed install
@@ -140,9 +157,6 @@ fw_depends() {
   set +E
   trap - ERR
 
-  # Politely return to IROOT for later install.sh code
-  cd $IROOT  
-
   return $FW_any_errors
 }
 
@@ -156,5 +170,3 @@ fw_exists() {
     echo 1
   fi 
 }
-
-
