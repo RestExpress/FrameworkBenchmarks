@@ -9,7 +9,6 @@
 ./jawn/src/main/java/app/controllers
 ./jawn/src/main/java/app/controllers/DbController.java
 ./jawn/src/main/java/app/controllers/FortunesController.java
-./jawn/src/main/java/app/controllers/IndexController.java
 ./jawn/src/main/java/app/db
 ./jawn/src/main/java/app/db/DbManager.java
 ./jawn/src/main/java/app/db/DbModule.java

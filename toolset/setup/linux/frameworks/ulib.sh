@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 RETCODE=$(fw_exists ${IROOT}/ulib.installed)
 [ ! "$RETCODE" == 0 ] || { \
   source $IROOT/ulib.installed
@@ -20,6 +19,24 @@ fi
 # AVOID "fatal error: postgres_fe.h: No such file or directory"
 # TODO: This should already be installed and unnecessary.
 sudo apt-get install -y postgresql-server-dev-all
+
+# make use of FIFO scheduling policy possible (we must avoid use of test because bash signal trapping)
+#type setcap >/dev/null 2>/dev/null
+
+#if [ $? -ne 0 ]; then
+  sudo apt-get install -y libcap2-bin
+#fi
+
+# We need to install mongo-c-driver (we don't have a ubuntu package)
+RETCODE=$(fw_exists ${IROOT}/mongo-c-driver.installed)
+if [ "$RETCODE" != 0 ]; then
+  wget https://github.com/mongodb/mongo-c-driver/releases/download/1.1.10/mongo-c-driver-1.1.10.tar.gz
+  tar -xzf mongo-c-driver-1.1.10.tar.gz
+  cd mongo-c-driver-1.1.10/
+  ./configure --prefix=$IROOT --libdir=$IROOT
+  make && sudo make install
+  touch ${IROOT}/mongo-c-driver.installed
+fi
 
 # Add a simple configuration file to it
 cd $ULIB_ROOT
@@ -68,7 +85,8 @@ USP_FLAGS="-DAS_cpoll_cppsp_DO" \
    --with-mysql --with-pgsql --with-sqlite3 \
    --without-ssl --without-pcre --without-expat \
    --without-libz --without-libuuid --without-magic --without-libares \
-   --enable-static-orm-driver='mysql pgsql sqlite' --enable-static-server-plugin=http
+   --enable-static-orm-driver='mysql pgsql sqlite' --enable-static-server-plugin=http \
+	--with-mongodb --with-mongodb-includes="-I$IROOT/include/libbson-1.0 -I$IROOT/include/libmongoc-1.0" --with-mongodb-ldflags="-L$IROOT"
 #  --enable-debug \
 #USP_LIBS="-ljson" \
 
@@ -78,9 +96,11 @@ cp -r tests/examples/benchmark/FrameworkBenchmarks/ULib/db $ULIB_ROOT
 cd examples/userver
 make install
 
-# 3. Compile usp pages for benchmark
+# 3. Compile usp pages for benchmark (no more REDIS)
 cd ../../src/ulib/net/server/plugin/usp
-make db.la fortune.la json.la plaintext.la query.la update.la
+make json.la plaintext.la  db.la  query.la  update.la  fortune.la \
+                          mdb.la mquery.la mupdate.la mfortune.la
+#                         rdb.la rquery.la rupdate.la rfortune.la
 
 # Check that compilation worked
 if [ ! -e .libs/db.so ]; then
@@ -88,9 +108,11 @@ if [ ! -e .libs/db.so ]; then
 fi
 
 mkdir -p $ULIB_DOCUMENT_ROOT
-cp .libs/db.so .libs/fortune.so .libs/json.so .libs/plaintext.so .libs/query.so .libs/update.so $ULIB_DOCUMENT_ROOT
+cp .libs/json.so .libs/plaintext.so \
+	.libs/db.so  .libs/query.so  .libs/update.so  .libs/fortune.so \
+	.libs/mdb.so .libs/mquery.so .libs/mupdate.so .libs/mfortune.so $ULIB_DOCUMENT_ROOT
+#  .libs/rdb.so .libs/rquery.so .libs/rupdate.so .libs/rfortune.so \
 
-echo 'export UMEMPOOL="136,0,0,85,1160,155,-17,-22,40"' > $IROOT/ulib.installed
 echo "export ULIB_VERSION=${ULIB_VERSION}" >> $IROOT/ulib.installed
 echo "export ULIB_ROOT=${ULIB_ROOT}" >> $IROOT/ulib.installed
 echo "export ULIB_DOCUMENT_ROOT=${ULIB_DOCUMENT_ROOT}" >> $IROOT/ulib.installed

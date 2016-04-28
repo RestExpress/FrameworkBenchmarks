@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>RestExpress-Minimal-Scaffold</name>
-	<!-- 
+	<!--
 		To run the project: mvn clean package exec:java
 		To create a project deployable assembly:
 			mvn clean package
@@ -20,12 +20,12 @@
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.11.2</version>
+			<version>0.11.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.strategicgains.repoexpress</groupId>
 			<artifactId>repoexpress-mongodb</artifactId>
-			<version>0.4.7</version>
+			<version>0.4.8</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-dbcp</groupId>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.36</version>
+			<version>5.1.38</version>
 		</dependency>
 	</dependencies>
 

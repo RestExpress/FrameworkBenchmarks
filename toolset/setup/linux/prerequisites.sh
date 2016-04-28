@@ -53,12 +53,19 @@ sudo apt-get -qqy install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options:
   llvm-dev                          `# Required for correct Ruby installation` \
   libboost-dev                      `# Silicon relies on boost::lexical_cast.` \
   postgresql-server-dev-9.3         `# Needed by cpoll.` \
-  xdg-utils                         `# Needed by dlang.`
+  xdg-utils                         `# Needed by dlang.` \
+  python-pip
 
-# Install gcc-4.8 and gcc-4.9
+sudo pip install colorama==0.3.1
+# Version 2.3 has a nice Counter() and other features
+# but it requires —-allow-external and -—allow-unverified
+sudo pip install progressbar==2.2
+sudo pip install requests
+
+# Install gcc-4.8, gcc-4.9 and clang
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo apt-get -yq update
-sudo apt-get install -qqy gcc-4.8 g++-4.8 gcc-4.9 g++-4.9
+sudo apt-get install -qqy gcc-4.8 g++-4.8 gcc-4.9 g++-4.9 clang-3.5
 
 # Stop permanently overwriting people's files just for 
 # trying out our software!

@@ -1,34 +1,42 @@
 import java.net.InetSocketAddress
-
-import argonaut._, Argonaut._
+import java.text.{DateFormat, SimpleDateFormat}
+import java.util.Date
 
 import io.finch._
-import io.finch.{Endpoint => _, _}
-
-import io.finch.route._
-import io.finch.route.Endpoint
-import io.finch.response._
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.Httpx
-
+import com.twitter.finagle.Http
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.tracing.NullTracer
 import com.twitter.util.Await
 
-object WebServer extends App {
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.jawn._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, Json}
 
-  val json: Endpoint[HttpRequest, HttpResponse] = {
-    import io.finch.argonaut._
-    Get / "json" /> Ok(Json("message" -> jString("Hello, World!"))).toFuture
+object WebServer extends App {
+  private val dateFormat: DateFormat = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z")
+
+  import io.finch.circe._
+  val json = get("json") {
+    Ok(Json.obj("message" -> Json.string("Hello, World!")))
+      .withHeader("Server" -> "finch")
+      .withHeader("Date" -> dateFormat.format(new Date()))
   }
 
-  val plaintext: Endpoint[HttpRequest, HttpResponse] =
-    Get / "plaintext" /> Ok("Hello, World!").toFuture
+  val plaintext: Endpoint[String] = get("plaintext") {
+    Ok("Hello, World!")
+      .withHeader("Server" -> "finch")
+      .withHeader("Date" -> dateFormat.format(new Date()))
+      .withContentType(Some("text/plain"))
+  }
 
-  val api: Service[HttpRequest, HttpResponse] = plaintext | json
-
-  Await.ready(
-    Httpx.serve(
-      "0.0.0.0:9000", api
-    )
+  Await.ready(Http.server
+    .withCompressionLevel(0)
+    .withStatsReceiver(NullStatsReceiver)
+    .withTracer(NullTracer)
+    .serve(":9000", (json :+: plaintext).toService)
   )
 }
