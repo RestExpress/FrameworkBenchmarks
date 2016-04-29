@@ -28,27 +28,25 @@ public class MongodbController
 		int count = determineQueryCount(request);
 
 		// Fetch some rows from the database.
-		final Integer[] ids = generateIdentifiers(count);
 
 		if (count == 1)
 		{
-			return worldRepo.find(ids[0]);
+			return worldRepo.find(generateIdentifier());
 		}
 		else
 		{
+			final Integer[] ids = generateIdentifiers(count);
 			return worldRepo.findAll(Arrays.asList(ids));
 		}
 	}
 
 	private int determineQueryCount(Request request)
 	{
-		int count = 1;
 		String value = request.getHeader("queries");
 
-		if (value != null)
-		{
-			count = Integer.parseInt(value);
-		}
+		if (value == null) return 1;
+		
+		int count = Integer.parseInt(value);
 
 		// Bounds check.
 		if (count > 500)
@@ -59,6 +57,7 @@ public class MongodbController
 		{
 			count = 1;
 		}
+
 		return count;
 	}
 
@@ -73,5 +72,10 @@ public class MongodbController
 		}
 
 		return ids;
+	}
+
+	private int generateIdentifier()
+	{
+		return ThreadLocalRandom.current().nextInt(DB_ROWS) + 1;
 	}
 }
